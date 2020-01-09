@@ -131,3 +131,4 @@ dmypy.json
 # Manim
 src/manim/videos/*
 src/manim/Tex
+src/manim/.vscode/settings.json
