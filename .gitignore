@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Manim
+src/manim/videos/*
+src/manim/Tex
