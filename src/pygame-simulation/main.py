@@ -22,7 +22,7 @@ while running:
         # exit if close button is pressed
         if event.type == pygame.QUIT:
             running = False
-    
+
     universe.update(elapsedTime)
 
     # draw --------------------------------------

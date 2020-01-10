@@ -1,10 +1,11 @@
 import numpy as np
 import pygame
 
+
 class particle:
     def __init__(self, isPositive):
         self.isPositive = isPositive
-        
+
         self.radius = 10
 
         self.position = np.array([30, 30])
@@ -17,4 +18,9 @@ class particle:
 
     def draw(self, surface):
         color = (0, 255, 0) if self.isPositive else (255, 0, 0)
-        pygame.draw.circle(surface, color, np.array(self.position, dtype=int), self.radius)
+        pygame.draw.circle(
+            surface,
+            color,
+            np.array(self.position, dtype=int),
+            self.radius
+        )

@@ -1,6 +1,7 @@
 import numpy as np
 from particle import particle
 
+
 class universe:
     def __init__(self):
         self.particles = [particle(False)]
