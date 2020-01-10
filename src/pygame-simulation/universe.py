@@ -5,7 +5,7 @@ from particle import particle
 
 class universe:
     spawnTime = 3
-    particleStartVel = 5
+    particleStartVel = 100
 
     def __init__(self, size):
         self._size = size
@@ -36,8 +36,13 @@ class universe:
                                                           particle.radius))
 
         # create particles
-        self.particles.append(particle(True, pos, vel))
-        self.particles.append(particle(False, inv_pos, inv_vel))
+        par = particle(True, pos, vel)
+        inv_par = particle(False, inv_pos, inv_vel)
+
+        par.connected_particles.append(inv_par)
+        inv_par.connected_particles.append(par)
+
+        self.particles.extend([par, inv_par])
 
     def draw(self, surface):
         # draw all particles

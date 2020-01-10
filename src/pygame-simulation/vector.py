@@ -40,3 +40,15 @@ def change_length(vector, new_length):
 
 def add(vector1, vector2):
     return (vector1[0] + vector2[0], vector1[1] + vector2[1])
+
+
+def get_distance(vector1, vector2):
+    dx = abs(vector1[0] - vector2[0])
+    dy = abs(vector1[1] - vector2[1])
+    return math.sqrt(math.pow(dx, 2) + math.pow(dy, 2))
+
+
+def point_from_to(vector1, vector2):
+    x = vector2[0] - vector1[0]
+    y = vector2[1] - vector1[1]
+    return (x, y)
