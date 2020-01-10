@@ -8,17 +8,21 @@ class particle:
     spawn_velocity = 100
     force_constant = 10000
 
-    def __init__(self, isPositive, position=(0, 0), direction=(0, 0)):
-        self.isPositive = isPositive
+    def __init__(self, is_positive, position=(0, 0), direction=(0, 0),
+                 side_velocity=(0, 0)):
+        self.is_positive = is_positive
 
         self.position = position
-        self.velocity = vector.change_length(direction, self.spawn_velocity)
+        self.velocity = vector.add(
+            vector.change_length(direction, self.spawn_velocity),
+            side_velocity
+        )
         self.force = (0, 0)
 
         # array of particles that this particle will react with
         self.connected_particles = []
 
-    def update(self, elapsedTime):
+    def update(self, elapsed_time):
         # force needs to be reset every update
         self.force = (0, 0)
 
@@ -27,8 +31,8 @@ class particle:
             self.force = vector.add(self.force, self.__calculate_force(p))
 
         self.velocity = np.add(self.velocity,
-                               np.array(self.force) * elapsedTime)
-        self.position = np.add(self.position, self.velocity * elapsedTime)
+                               np.array(self.force) * elapsed_time)
+        self.position = np.add(self.position, self.velocity * elapsed_time)
 
     def __calculate_force(self, other_particle):
         distance = vector.get_distance(self.position, other_particle.position)
@@ -39,7 +43,7 @@ class particle:
         force_strength = self.force_constant / distance
 
         # invert force if the other particle has the same charge
-        if self.isPositive == other_particle.isPositive:
+        if self.is_positive == other_particle.is_positive:
             force_strength *= -1
 
         # vector pointing from this particle to the other particle
@@ -52,7 +56,7 @@ class particle:
 
     def draw(self, surface):
         # draw particle
-        color = (0, 255, 0) if self.isPositive else (255, 0, 0)
+        color = (150, 255, 150) if self.is_positive else (255, 150, 150)
         pygame.draw.circle(
             surface,
             color,
@@ -65,7 +69,7 @@ class particle:
             (255, 255, 255),
             self.position,
             vector.add(self.position, np.array(self.velocity) * 0.3),
-            4
+            2
         )
         # draw force vector
         pygame.draw.line(
@@ -73,13 +77,13 @@ class particle:
             (100, 100, 255),
             self.position,
             vector.add(self.position, np.array(self.force) * 0.1),
-            3
+            2
         )
 
     @staticmethod
     def collide(particle1, particle2):
         # only particles with different charge can colide
-        if particle1.isPositive == particle2.isPositive:
+        if particle1.is_positive == particle2.is_positive:
             return False
 
         distance = vector.get_distance(particle1.position, particle2.position)

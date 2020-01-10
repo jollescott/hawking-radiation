@@ -1,10 +1,13 @@
 import time
 import vector
+import random
+import math
 from particle import particle
 
 
 class universe:
-    spawn_time = 0.2
+    min_spawn_time = 0.1
+    max_spawn_time = 0.5
 
     def __init__(self, size):
         self._size = size
@@ -36,7 +39,8 @@ class universe:
         # check if it is time to spawn a particle pair
         if self.__particle_spawn_timer <= 0:
             self.spawn_particle_pair()
-            self.__particle_spawn_timer = self.spawn_time
+            self.__particle_spawn_timer = random.uniform(self.min_spawn_time,
+                                                         self.max_spawn_time)
 
     def spawn_particle_pair(self):
         # start directions
@@ -50,9 +54,14 @@ class universe:
         inv_pos = vector.add(center, vector.change_length(inv_way,
                                                           particle.radius + 1))
 
+        # side velocity
+        max_vel = 100
+        side_vel = vector.new_vector(random.uniform(-max_vel, max_vel),
+                                     vector.get_rotation(way) + math.pi / 2)
+
         # create particles
-        par = particle(True, pos, way)
-        inv_par = particle(False, inv_pos, inv_way)
+        par = particle(True, pos, way, side_vel)
+        inv_par = particle(False, inv_pos, inv_way, side_vel)
 
         # connect particle pair
         par.connected_particles.append(inv_par)
