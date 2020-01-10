@@ -3,14 +3,14 @@ import pygame
 
 
 class particle:
-    def __init__(self, isPositive):
+    radius = 10
+
+    def __init__(self, isPositive, position=(0, 0), velocity=(0, 0)):
         self.isPositive = isPositive
 
-        self.radius = 10
-
-        self.position = np.array([30, 30])
-        self.velocity = np.array([0, 0])
-        self.force = np.array([0, 0])
+        self.position = position
+        self.velocity = velocity
+        self.force = np.array((0, 0))
 
     def update(self, elapsedTime):
         self.velocity = np.add(self.velocity, self.force * elapsedTime)

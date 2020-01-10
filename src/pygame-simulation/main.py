@@ -5,7 +5,7 @@ from universe import universe
 (width, height) = (800, 600)
 screen = pygame.display.set_mode((width, height))
 
-universe = universe()
+universe = universe((width, height))
 
 startTime = time.perf_counter()
 
@@ -14,8 +14,6 @@ while running:
 
     elapsedTime = time.perf_counter() - startTime
     startTime = time.perf_counter()
-
-    print(elapsedTime)
 
     # update -----------------------------------
     for event in pygame.event.get():
