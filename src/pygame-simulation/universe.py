@@ -45,6 +45,8 @@ class universe:
         # connect with all universe particles
         par.connected_particles.extend(self.particles)
         inv_par.connected_particles.extend(self.particles)
+        for p in self.particles:
+            p.connected_particles.extend([par, inv_par])
 
         # add to universe
         self.particles.extend([par, inv_par])
