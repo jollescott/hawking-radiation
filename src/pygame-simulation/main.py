@@ -8,6 +8,7 @@ screen = pygame.display.set_mode((width, height))
 universe = universe((width, height))
 
 startTime = time.perf_counter()
+time_multiplier = 1
 
 running = True
 while running:
@@ -21,7 +22,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    universe.update(elapsedTime)
+    universe.update(elapsedTime * time_multiplier)
 
     # draw --------------------------------------
     screen.fill((0, 0, 0))

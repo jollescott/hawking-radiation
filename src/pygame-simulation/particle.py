@@ -5,13 +5,14 @@ import vector
 
 class particle:
     radius = 10
+    spawn_velocity = 100
     force_constant = 10000
 
-    def __init__(self, isPositive, position=(0, 0), velocity=(0, 0)):
+    def __init__(self, isPositive, position=(0, 0), direction=(0, 0)):
         self.isPositive = isPositive
 
         self.position = position
-        self.velocity = velocity
+        self.velocity = vector.change_length(direction, self.spawn_velocity)
         self.force = (0, 0)
 
         # array of particles that this particle will react with
@@ -50,6 +51,7 @@ class particle:
         return vector.change_length(force_vector, force_strength)
 
     def draw(self, surface):
+        # draw particle
         color = (0, 255, 0) if self.isPositive else (255, 0, 0)
         pygame.draw.circle(
             surface,
@@ -57,8 +59,7 @@ class particle:
             np.array(self.position, dtype=int),
             self.radius
         )
-
-        # draw velcity vector
+        # draw velocity vector
         pygame.draw.line(
             surface,
             (255, 255, 255),
