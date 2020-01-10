@@ -38,9 +38,15 @@ class universe:
         par = particle(True, pos, way)
         inv_par = particle(False, inv_pos, inv_way)
 
+        # connect particle pair
         par.connected_particles.append(inv_par)
         inv_par.connected_particles.append(par)
 
+        # connect with all universe particles
+        par.connected_particles.extend(self.particles)
+        inv_par.connected_particles.extend(self.particles)
+
+        # add to universe
         self.particles.extend([par, inv_par])
 
     def draw(self, surface):
