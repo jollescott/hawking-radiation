@@ -75,3 +75,12 @@ class particle:
             vector.add(self.position, np.array(self.force) * 0.1),
             3
         )
+
+    @staticmethod
+    def collide(particle1, particle2):
+        # only particles with different charge can colide
+        if particle1.isPositive == particle2.isPositive:
+            return False
+
+        distance = vector.get_distance(particle1.position, particle2.position)
+        return distance < particle.radius * 2

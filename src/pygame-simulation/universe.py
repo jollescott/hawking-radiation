@@ -4,7 +4,7 @@ from particle import particle
 
 
 class universe:
-    spawn_time = 3
+    spawn_time = 0.2
 
     def __init__(self, size):
         self._size = size
@@ -12,12 +12,28 @@ class universe:
         self.__particle_spawn_timer = time.perf_counter()
 
     def update(self, elapsed_time):
-        # update all particles
-        for p in self.particles:
+        # loop thorugh all particles
+        index = 0
+        while index < len(self.particles):
+            p = self.particles[index]
+            # loop thorugh all particles connected to this particle
+            cp_index = 0
+            while cp_index < len(p.connected_particles):
+                cp = p.connected_particles[cp_index]
+                # remove particles if collided
+                if particle.collide(p, cp):
+                    self.particles.pop(index)
+                    self.particles.remove(cp)
+                    print("particle pair removed")
+                    break
+                cp_index += 1
+
+            # update particle
             p.update(elapsed_time)
+            index += 1
 
         self.__particle_spawn_timer -= elapsed_time
-        # check it it is time to spawn a particle pair
+        # check if it is time to spawn a particle pair
         if self.__particle_spawn_timer <= 0:
             self.spawn_particle_pair()
             self.__particle_spawn_timer = self.spawn_time
@@ -32,7 +48,7 @@ class universe:
         # start positions (the particles can't overlap when spawned)
         pos = vector.add(center, vector.change_length(way, particle.radius))
         inv_pos = vector.add(center, vector.change_length(inv_way,
-                                                          particle.radius))
+                                                          particle.radius + 1))
 
         # create particles
         par = particle(True, pos, way)
@@ -43,13 +59,15 @@ class universe:
         inv_par.connected_particles.append(par)
 
         # connect with all universe particles
-        par.connected_particles.extend(self.particles)
-        inv_par.connected_particles.extend(self.particles)
-        for p in self.particles:
-            p.connected_particles.extend([par, inv_par])
+        # par.connected_particles.extend(self.particles)
+        # inv_par.connected_particles.extend(self.particles)
+        # for p in self.particles:
+        #     p.connected_particles.extend([par, inv_par])
 
         # add to universe
         self.particles.extend([par, inv_par])
+
+        print("particle pair spawned at " + str(center))
 
     def draw(self, surface):
         # draw all particles
