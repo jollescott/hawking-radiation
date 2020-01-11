@@ -58,7 +58,7 @@ class universe:
                 vector.rand_vector_rot(self.black_hole.get_radius())
             )
 
-            # start positions
+            # start directions
             way = vector.point_from_to(self.black_hole.position, center)
             inv_way = vector.invert(way)
 
@@ -67,8 +67,20 @@ class universe:
 
         # spawn outside event horizon
         else:
+            b_radius = self.black_hole.get_radius()
+            min_horizon_dist = 20
+            max_horizon_dist = max(self._size) / 2 - b_radius
+
             # center start postition
-            center = vector.rand_vector_pos(0, self._size[0], 0, self._size[1])
+            center = vector.add(
+                self.black_hole.position,
+                vector.rand_vector_rot(
+                    random.uniform(
+                        b_radius + min_horizon_dist,
+                        b_radius + max_horizon_dist
+                    )
+                )
+            )
 
             # start directions
             way = vector.rand_vector_rot(1)
