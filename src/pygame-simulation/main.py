@@ -1,6 +1,6 @@
 import pygame
 import time
-from universe import universe
+from world.universe import universe
 
 (width, height) = (800, 600)
 screen = pygame.display.set_mode((width, height))

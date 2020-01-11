@@ -1,6 +1,6 @@
 import numpy as np
-import pygame
 import vector
+from pygame import draw
 
 
 class particle:
@@ -57,14 +57,14 @@ class particle:
     def draw(self, surface):
         # draw particle
         color = (150, 255, 150) if self.is_positive else (255, 150, 150)
-        pygame.draw.circle(
+        draw.circle(
             surface,
             color,
             np.array(self.position, dtype=int),
             self.radius
         )
         # draw velocity vector
-        pygame.draw.line(
+        draw.line(
             surface,
             (255, 255, 255),
             self.position,
@@ -72,7 +72,7 @@ class particle:
             2
         )
         # draw force vector
-        pygame.draw.line(
+        draw.line(
             surface,
             (100, 100, 255),
             self.position,

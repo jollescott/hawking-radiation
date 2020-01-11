@@ -2,7 +2,8 @@ import time
 import vector
 import random
 import math
-from particle import particle
+from world.particle import particle
+from world.black_hole import black_hole
 
 
 class universe:
@@ -11,6 +12,7 @@ class universe:
 
     def __init__(self, size):
         self._size = size
+        self.black_hole = black_hole((size[0] / 2, size[1] / 2), 3000000)
         self.particles = []
         self.__particle_spawn_timer = time.perf_counter()
 
@@ -79,6 +81,7 @@ class universe:
         print("particle pair spawned at " + str(center))
 
     def draw(self, surface):
+        self.black_hole.draw(surface)
         # draw all particles
         for p in self.particles:
             p.draw(surface)
