@@ -17,6 +17,8 @@ class universe:
         self.__particle_spawn_timer = time.perf_counter()
 
     def update(self, elapsed_time):
+        self.black_hole.update(elapsed_time)
+
         # loop thorugh all particles
         index = 0
         while index < len(self.particles):
@@ -45,38 +47,67 @@ class universe:
                                                          self.max_spawn_time)
 
     def spawn_particle_pair(self):
-        # start directions
-        way = vector.rand_vector_rot(1)
-        inv_way = vector.invert(way)
+        spawn_on_horizon_change = 0.15
+        on_horizon = random.uniform(0, 1) < spawn_on_horizon_change
 
-        # center start postition
-        center = vector.rand_vector_pos(0, self._size[0], 0, self._size[1])
+        # spawn on event horizon
+        if (on_horizon):
+            # center start position
+            center = vector.add(
+                self.black_hole.position,
+                vector.rand_vector_rot(self.black_hole.get_radius())
+            )
+
+            # start positions
+            way = vector.point_from_to(self.black_hole.position, center)
+            inv_way = vector.invert(way)
+
+            # side velocity
+            side_vel = (0, 0)
+
+        # spawn outside event horizon
+        else:
+            # center start postition
+            center = vector.rand_vector_pos(0, self._size[0], 0, self._size[1])
+
+            # start directions
+            way = vector.rand_vector_rot(1)
+            inv_way = vector.invert(way)
+
+            # side velocity
+            max_vel = 100
+            side_vel = vector.new_vector(random.uniform(-max_vel, max_vel),
+                                         vector.get_rotation(way) + math.pi/2)
+
         # start positions (the particles can't overlap when spawned)
         pos = vector.add(center, vector.change_length(way, particle.radius))
         inv_pos = vector.add(center, vector.change_length(inv_way,
                                                           particle.radius + 1))
 
-        # side velocity
-        max_vel = 100
-        side_vel = vector.new_vector(random.uniform(-max_vel, max_vel),
-                                     vector.get_rotation(way) + math.pi / 2)
-
         # create particles
         par = particle(True, pos, way, side_vel)
         inv_par = particle(False, inv_pos, inv_way, side_vel)
 
-        # connect particle pair
-        par.connected_particles.append(inv_par)
-        inv_par.connected_particles.append(par)
+        # spawn on event horizon
+        if (on_horizon):
+            # add to universe/black_hole
+            self.particles.append(par)
+            self.black_hole.eat_particle(inv_par)
+
+        # spawn outside event horizon
+        else:
+            # connect particle pair
+            par.connected_particles.append(inv_par)
+            inv_par.connected_particles.append(par)
+
+            # add to universe
+            self.particles.extend([par, inv_par])
 
         # connect with all universe particles
         # par.connected_particles.extend(self.particles)
         # inv_par.connected_particles.extend(self.particles)
         # for p in self.particles:
         #     p.connected_particles.extend([par, inv_par])
-
-        # add to universe
-        self.particles.extend([par, inv_par])
 
         print("particle pair spawned at " + str(center))
 
