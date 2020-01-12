@@ -7,6 +7,7 @@ class particle:
     radius = 10
     spawn_velocity = 100
     force_constant = 10000
+    mass = 3 * 10**-13
 
     def __init__(self, is_positive, position=(0, 0), direction=(0, 0),
                  side_velocity=(0, 0)):
@@ -22,11 +23,11 @@ class particle:
         # array of particles that this particle will react with
         self.connected_particles = []
 
-    def update(self, elapsed_time):
+    def update(self, elapsed_time, force):
         # force needs to be reset every update
-        self.force = (0, 0)
+        self.force = force
 
-        # add force from all concted particles
+        # add force from all connected particles
         for p in self.connected_particles:
             self.force = vector.add(self.force, self.__calculate_force(p))
 
@@ -55,28 +56,35 @@ class particle:
         return vector.change_length(force_vector, force_strength)
 
     def draw(self, surface):
+        position = np.array(self.position, dtype=int)
         # draw particle
         color = (150, 255, 150) if self.is_positive else (255, 150, 150)
         draw.circle(
             surface,
             color,
-            np.array(self.position, dtype=int),
+            position,
             self.radius
         )
         # draw velocity vector
         draw.line(
             surface,
             (255, 255, 255),
-            self.position,
-            vector.add(self.position, np.array(self.velocity) * 0.3),
+            position,
+            np.array(
+                vector.add(self.position, np.array(self.velocity) * 0.3),
+                dtype=int
+            ),
             2
         )
         # draw force vector
         draw.line(
             surface,
             (100, 100, 255),
-            self.position,
-            vector.add(self.position, np.array(self.force) * 0.1),
+            position,
+            np.array(
+                vector.add(self.position, np.array(self.force) * 0.1),
+                dtype=int
+            ),
             2
         )
 

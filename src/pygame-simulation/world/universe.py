@@ -4,6 +4,8 @@ import random
 import math
 from world.particle import particle
 from world.black_hole import black_hole
+import formulas
+import numpy as np
 
 
 class universe:
@@ -12,7 +14,8 @@ class universe:
 
     def __init__(self, size):
         self._size = size
-        self.black_hole = black_hole((size[0] / 2, size[1] / 2), 3000000)
+        self.black_hole = black_hole(np.array(size) * 0.5, formulas.Ms * 0.05)
+        print(self.black_hole.get_radius())
         self.particles = []
         self.__particle_spawn_timer = time.perf_counter()
 
@@ -36,19 +39,22 @@ class universe:
                 cp_index += 1
 
             # update particle
-            p.update(elapsed_time)
+            p.update(
+                elapsed_time,
+                (0, 0)  # self.black_hole.calculate_particle_force(p)
+            )
             index += 1
 
         self.__particle_spawn_timer -= elapsed_time
         # check if it is time to spawn a particle pair
-        if self.__particle_spawn_timer <= 0:
+        if self.__particle_spawn_timer <= 0 and self.black_hole.mass > 0:
             self.spawn_particle_pair()
             self.__particle_spawn_timer = random.uniform(self.min_spawn_time,
                                                          self.max_spawn_time)
 
     def spawn_particle_pair(self):
-        spawn_on_horizon_change = 0.15
-        on_horizon = random.uniform(0, 1) < spawn_on_horizon_change
+        spawn_on_horizon_chance = 0.15
+        on_horizon = random.uniform(0, 1) < spawn_on_horizon_chance
 
         # spawn on event horizon
         if (on_horizon):
@@ -63,7 +69,11 @@ class universe:
             inv_way = vector.invert(way)
 
             # side velocity
-            side_vel = (0, 0)
+            # side_vel = (0, 0)
+            # TODO: remove duplicated code
+            max_vel = 100
+            side_vel = vector.new_vector(random.uniform(-max_vel, max_vel),
+                                         vector.get_rotation(way) + math.pi/2)
 
         # spawn outside event horizon
         else:
