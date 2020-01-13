@@ -23,14 +23,14 @@ class black_hole:
             p.connected_particles.remove(particle)
         particle.connected_particles = []
 
-        # set particle velcity towards black hole center
-        particle.velocity = vector.change_length(
-            vector.point_from_to(
-                particle.position,
-                self.position
-            ),
-            vector.get_length(particle.velocity)
-        )
+        # # set particle velcity towards black hole center
+        # particle.velocity = vector.change_length(
+        #     vector.point_from_to(
+        #         particle.position,
+        #         self.position
+        #     ),
+        #     vector.get_length(particle.velocity)
+        # )
 
         self.eaten_particles.append(particle)
 
@@ -64,9 +64,15 @@ class black_hole:
             else:
                 index += 1
 
+            pf = self.calculate_particle_force(p)
+            max_vel = vector.get_length(pf) / 2
+            # limit particle velocity to pervent infinit orbit
+            # around black hole
+            if vector.get_length(p.velocity) > max_vel:
+                p.velocity = vector.change_length(p.velocity, max_vel)
             p.update(
                 elapsed_time,
-                self.calculate_particle_force(p)
+                pf
             )
 
     def __should_be_removed(self, particle):

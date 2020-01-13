@@ -56,6 +56,11 @@ class universe:
         spawn_on_horizon_chance = 0.15
         on_horizon = random.uniform(0, 1) < spawn_on_horizon_chance
 
+        #
+        # p_??? data for positive particle
+        # n_??? data for negative particle
+        #
+
         # spawn on event horizon
         if (on_horizon):
             # center start position
@@ -64,16 +69,22 @@ class universe:
                 vector.rand_vector_rot(self.black_hole.get_radius())
             )
 
+            b_rot = vector.get_rotation(
+                vector.point_from_to(center, self.black_hole.position)
+            )
+            side_rot = random.uniform(-math.pi / 2, math.pi / 2)
             # start directions
-            way = vector.point_from_to(self.black_hole.position, center)
-            inv_way = vector.invert(way)
+            p_dir = vector.new_vector(
+                1,
+                b_rot + math.pi + side_rot
+            )
+            n_dir = vector.new_vector(
+                1,
+                b_rot - side_rot
+            )
 
             # side velocity
-            # side_vel = (0, 0)
-            # TODO: remove duplicated code
-            max_vel = 100
-            side_vel = vector.new_vector(random.uniform(-max_vel, max_vel),
-                                         vector.get_rotation(way) + math.pi/2)
+            side_vel = (0, 0)
 
         # spawn outside event horizon
         else:
@@ -93,43 +104,48 @@ class universe:
             )
 
             # start directions
-            way = vector.rand_vector_rot(1)
-            inv_way = vector.invert(way)
+            p_dir = vector.rand_vector_rot(1)
+            n_dir = vector.invert(p_dir)
 
             # side velocity
             max_vel = 100
             side_vel = vector.new_vector(random.uniform(-max_vel, max_vel),
-                                         vector.get_rotation(way) + math.pi/2)
+                                         vector.get_rotation(p_dir) + math.pi/2)
 
         # start positions (the particles can't overlap when spawned)
-        pos = vector.add(center, vector.change_length(way, particle.radius))
-        inv_pos = vector.add(center, vector.change_length(inv_way,
-                                                          particle.radius + 1))
+        p_pos = vector.add(
+            center,
+            vector.change_length(p_dir, particle.radius)
+        )
+        n_pos = vector.add(
+            center,
+            vector.change_length(n_dir, particle.radius + 1)
+        )
 
         # create particles
-        par = particle(True, pos, way, side_vel)
-        inv_par = particle(False, inv_pos, inv_way, side_vel)
+        p_par = particle(True, p_pos, p_dir, side_vel)
+        n_par = particle(False, n_pos, n_dir, side_vel)
 
         # spawn on event horizon
         if (on_horizon):
             # add to universe/black_hole
-            self.particles.append(par)
-            self.black_hole.eat_particle(inv_par)
+            self.particles.append(p_par)
+            self.black_hole.eat_particle(n_par)
 
         # spawn outside event horizon
         else:
             # connect particle pair
-            par.connected_particles.append(inv_par)
-            inv_par.connected_particles.append(par)
+            p_par.connected_particles.append(n_par)
+            n_par.connected_particles.append(p_par)
 
             # add to universe
-            self.particles.extend([par, inv_par])
+            self.particles.extend([p_par, n_par])
 
         # connect with all universe particles
         # par.connected_particles.extend(self.particles)
         # inv_par.connected_particles.extend(self.particles)
         # for p in self.particles:
-        #     p.connected_particles.extend([par, inv_par])
+        #     p.connected_particles.extend([p_par, n_par])
 
         print("particle pair spawned at " + str(center))
 

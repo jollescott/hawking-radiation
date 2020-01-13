@@ -7,7 +7,7 @@ class trail:
     color = (255, 255, 255)
     fade_color = (0, 0, 0)
     thickness = 1
-    max_length = 80
+    max_length = 40
     min_point_dist = 1
 
     def __init__(self):
