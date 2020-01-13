@@ -1,12 +1,13 @@
 import numpy as np
 import vector
 from pygame import draw
+from trail import trail
 
 
 class particle:
-    radius = 10
+    radius = 5
     spawn_velocity = 100
-    force_constant = 10000
+    force_constant = 7000
     mass = 3 * 10**-13
 
     def __init__(self, is_positive, position=(0, 0), direction=(0, 0),
@@ -23,6 +24,8 @@ class particle:
         # array of particles that this particle will react with
         self.connected_particles = []
 
+        self.trail = trail()
+
     def update(self, elapsed_time, force):
         # force needs to be reset every update
         self.force = force
@@ -34,6 +37,8 @@ class particle:
         self.velocity = np.add(self.velocity,
                                np.array(self.force) * elapsed_time)
         self.position = np.add(self.position, self.velocity * elapsed_time)
+
+        self.trail.add_point(self.position)
 
     def __calculate_force(self, other_particle):
         distance = vector.get_distance(self.position, other_particle.position)
@@ -56,37 +61,40 @@ class particle:
         return vector.change_length(force_vector, force_strength)
 
     def draw(self, surface):
+        # draw trail
+        self.trail.draw(surface)
+
         position = np.array(self.position, dtype=int)
         # draw particle
-        color = (150, 255, 150) if self.is_positive else (255, 150, 150)
+        color = (150, 150, 255) if self.is_positive else (255, 150, 150)
         draw.circle(
             surface,
             color,
             position,
             self.radius
         )
-        # draw velocity vector
-        draw.line(
-            surface,
-            (255, 255, 255),
-            position,
-            np.array(
-                vector.add(self.position, np.array(self.velocity) * 0.3),
-                dtype=int
-            ),
-            2
-        )
-        # draw force vector
-        draw.line(
-            surface,
-            (100, 100, 255),
-            position,
-            np.array(
-                vector.add(self.position, np.array(self.force) * 0.1),
-                dtype=int
-            ),
-            2
-        )
+        # # draw velocity vector
+        # draw.line(
+        #     surface,
+        #     (255, 255, 255),
+        #     position,
+        #     np.array(
+        #         vector.add(self.position, np.array(self.velocity) * 0.3),
+        #         dtype=int
+        #     ),
+        #     2
+        # )
+        # # draw force vector
+        # draw.line(
+        #     surface,
+        #     (100, 255, 100),
+        #     position,
+        #     np.array(
+        #         vector.add(self.position, np.array(self.force) * 0.1),
+        #         dtype=int
+        #     ),
+        #     2
+        # )
 
     @staticmethod
     def collide(particle1, particle2):

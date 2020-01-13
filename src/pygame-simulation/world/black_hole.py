@@ -1,5 +1,4 @@
 import numpy as np
-import math
 import vector
 from pygame import draw
 import formulas
@@ -24,14 +23,14 @@ class black_hole:
             p.connected_particles.remove(particle)
         particle.connected_particles = []
 
-        # # set particle velcity towards black hole center
-        # particle.velocity = vector.change_length(
-        #     vector.point_from_to(
-        #         particle.position,
-        #         self.position
-        #     ),
-        #     vector.get_length(particle.velocity)
-        # )
+        # set particle velcity towards black hole center
+        particle.velocity = vector.change_length(
+            vector.point_from_to(
+                particle.position,
+                self.position
+            ),
+            vector.get_length(particle.velocity)
+        )
 
         self.eaten_particles.append(particle)
 
@@ -71,7 +70,7 @@ class black_hole:
             )
 
     def __should_be_removed(self, particle):
-        min_dist = 50
+        min_dist = 10
         return vector.get_distance(
             self.position,
             particle.position

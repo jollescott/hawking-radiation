@@ -78,7 +78,7 @@ class universe:
         # spawn outside event horizon
         else:
             b_radius = self.black_hole.get_radius()
-            min_horizon_dist = 20
+            min_horizon_dist = 50
             max_horizon_dist = max(self._size) / 2 - b_radius
 
             # center start postition
