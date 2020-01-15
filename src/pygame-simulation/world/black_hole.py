@@ -53,6 +53,8 @@ class black_hole:
         )
 
     def update(self, elapsed_time):
+        # TODO: eat particles
+
         # Updates all particles and removes them if they have reached
         # the center of the black hole.
         index = 0

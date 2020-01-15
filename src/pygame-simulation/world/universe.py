@@ -109,8 +109,10 @@ class universe:
 
             # side velocity
             max_vel = 100
-            side_vel = vector.new_vector(random.uniform(-max_vel, max_vel),
-                                         vector.get_rotation(p_dir) + math.pi/2)
+            side_vel = vector.new_vector(
+                random.uniform(-max_vel, max_vel),
+                vector.get_rotation(p_dir) + math.pi/2
+            )
 
         # start positions (the particles can't overlap when spawned)
         p_pos = vector.add(

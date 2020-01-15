@@ -10,33 +10,39 @@ class particle:
     force_constant = 7000
     mass = 3 * 10**-13
 
-    def __init__(self, is_positive, position=(0, 0), direction=(0, 0),
-                 side_velocity=(0, 0)):
+    def __init__(self, is_positive, position, velocity):
         self.is_positive = is_positive
-
         self.position = position
-        self.velocity = vector.add(
-            vector.change_length(direction, self.spawn_velocity),
-            side_velocity
-        )
+        self.velocity = velocity
+
         self.force = (0, 0)
-
-        # array of particles that this particle will react with
-        self.connected_particles = []
-
+        self.life_time = 0
         self.trail = trail()
 
+        # particle that this particle will react with
+        self.connected_particle
+
     def update(self, elapsed_time, force):
+        self.life_time += elapsed_time
+
         # force needs to be reset every update
         self.force = force
 
-        # add force from all connected particles
-        for p in self.connected_particles:
-            self.force = vector.add(self.force, self.__calculate_force(p))
+        if self.connected_particle:
+            # add force from the connected particle
+            self.force = vector.add(
+                self.force,
+                self.__calculate_force(self.connected_particle)
+            )
 
-        self.velocity = np.add(self.velocity,
-                               np.array(self.force) * elapsed_time)
-        self.position = np.add(self.position, self.velocity * elapsed_time)
+        self.velocity = np.add(
+            self.velocity,
+            np.array(self.force) * elapsed_time
+        )
+        self.position = np.add(
+            self.position,
+            self.velocity * elapsed_time
+        )
 
         self.trail.add_point(self.position)
 
