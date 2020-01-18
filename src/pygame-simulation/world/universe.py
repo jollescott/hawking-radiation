@@ -9,35 +9,30 @@ import numpy as np
 
 
 class universe:
-    min_spawn_time = 0.1
+    min_spawn_time = 0.10
     max_spawn_time = 0.5
+    spawn_on_horizon_chance = 0.15
+    particle_spawn_velocity = 100
 
     def __init__(self, size):
         self._size = size
         self.black_hole = black_hole(np.array(size) * 0.5, formulas.Ms * 0.05)
         print(self.black_hole.get_radius())
-        self.particles = []
+        self._particles = []
         self.__particle_spawn_timer = time.perf_counter()
 
     def update(self, elapsed_time):
-        self.black_hole.update(elapsed_time)
+        self.black_hole.update(elapsed_time, self._particles)
 
         # loop thorugh all particles
         index = 0
-        while index < len(self.particles):
-            p = self.particles[index]
-            # loop thorugh all particles connected to this particle
-            cp_index = 0
-            while cp_index < len(p.connected_particles):
-                cp = p.connected_particles[cp_index]
-                # remove particles if collided
-                if particle.collide(p, cp):
-                    self.particles.pop(index)
-                    self.particles.remove(cp)
-                    print("particle pair removed")
-                    break
-                cp_index += 1
-
+        while index < len(self._particles):
+            p = self._particles[index]
+            cp = p.connected_particle
+            # remove if collided
+            if cp and particle.collide(p, cp):
+                self._particles.pop(index)
+                self._particles.remove(cp)
             # update particle
             p.update(
                 elapsed_time,
@@ -48,111 +43,125 @@ class universe:
         self.__particle_spawn_timer -= elapsed_time
         # check if it is time to spawn a particle pair
         if self.__particle_spawn_timer <= 0 and self.black_hole.mass > 0:
-            self.spawn_particle_pair()
+            self._spawn_particle_pair()
             self.__particle_spawn_timer = random.uniform(self.min_spawn_time,
                                                          self.max_spawn_time)
 
-    def spawn_particle_pair(self):
-        spawn_on_horizon_chance = 0.15
-        on_horizon = random.uniform(0, 1) < spawn_on_horizon_chance
+    def _spawn_particle_pair(self):
+        """
+        Spawns a pair of particles with opposite charge.
+        """
+        on_horizon = random.uniform(0, 1) < self.spawn_on_horizon_chance
 
-        #
-        # p_??? data for positive particle
-        # n_??? data for negative particle
-        #
-
-        # spawn on event horizon
-        if (on_horizon):
-            # center start position
-            center = vector.add(
-                self.black_hole.position,
-                vector.rand_vector_rot(self.black_hole.get_radius())
-            )
-
-            b_rot = vector.get_rotation(
-                vector.point_from_to(center, self.black_hole.position)
-            )
-            side_rot = random.uniform(-math.pi / 2, math.pi / 2)
-            # start directions
-            p_dir = vector.new_vector(
-                1,
-                b_rot + math.pi + side_rot
-            )
-            n_dir = vector.new_vector(
-                1,
-                b_rot - side_rot
-            )
-
-            # side velocity
-            side_vel = (0, 0)
-
-        # spawn outside event horizon
-        else:
-            b_radius = self.black_hole.get_radius()
-            min_horizon_dist = 50
-            max_horizon_dist = max(self._size) / 2 - b_radius
-
-            # center start postition
-            center = vector.add(
-                self.black_hole.position,
-                vector.rand_vector_rot(
-                    random.uniform(
-                        b_radius + min_horizon_dist,
-                        b_radius + max_horizon_dist
-                    )
-                )
-            )
-
-            # start directions
-            p_dir = vector.rand_vector_rot(1)
-            n_dir = vector.invert(p_dir)
-
-            # side velocity
-            max_vel = 100
-            side_vel = vector.new_vector(
-                random.uniform(-max_vel, max_vel),
-                vector.get_rotation(p_dir) + math.pi/2
-            )
-
-        # start positions (the particles can't overlap when spawned)
-        p_pos = vector.add(
-            center,
-            vector.change_length(p_dir, particle.radius)
+        particles = (
+            self._create_on_event_horizon() if on_horizon
+            else self._create_outside_event_horizon()
         )
-        n_pos = vector.add(
-            center,
-            vector.change_length(n_dir, particle.radius + 1)
+        self._particles.extend(particles)
+
+    def _create_on_event_horizon(self):
+        """
+        Returns a pair of particles with opposite charge positioned on the
+        event horizon.
+        """
+        # spawn center relative to the center of the black hole
+        spawn_offset = vector.rand_vector_rot(self.black_hole.get_radius())
+
+        spawn_center = vector.add(self.black_hole.position, spawn_offset)
+
+        rand_rot = random.choice((-1, 1)) * random.uniform(math.pi / 4, math.pi / 2)
+
+        reg_par = particle(
+            # charge
+            True,
+            # position
+            vector.add(
+                spawn_center,
+                vector.change_length(spawn_offset, particle.radius)
+            ),
+            # velocity
+            vector.new_vector(
+                self.particle_spawn_velocity,
+                vector.get_rotation(spawn_offset) + rand_rot
+            )
+        )
+        neg_par = particle(
+            # charge
+            False,
+            # position
+            vector.subtract(
+                spawn_center,
+                vector.change_length(spawn_offset, particle.radius)
+            ),
+            # velocity
+            vector.new_vector(
+                self.particle_spawn_velocity,
+                vector.get_rotation(spawn_offset) + math.pi - rand_rot
+            )
         )
 
-        # create particles
-        p_par = particle(True, p_pos, p_dir, side_vel)
-        n_par = particle(False, n_pos, n_dir, side_vel)
+        reg_par.connected_particle = neg_par
+        neg_par.connected_particle = reg_par
 
-        # spawn on event horizon
-        if (on_horizon):
-            # add to universe/black_hole
-            self.particles.append(p_par)
-            self.black_hole.eat_particle(n_par)
+        return (reg_par, neg_par)
 
-        # spawn outside event horizon
-        else:
-            # connect particle pair
-            p_par.connected_particles.append(n_par)
-            n_par.connected_particles.append(p_par)
+    def _create_outside_event_horizon(self):
+        """
+        Returns a pair of particles with opposite charge positioned outside the
+        event horizon.
+        """
+        min_horizon_dist = 40
+        spawn_center = vector.add(
+            self.black_hole.position,
+            vector.rand_vector_rot(
+                random.uniform(self.black_hole.get_radius() + min_horizon_dist, max(self._size) / 2)
+            )
+        )
 
-            # add to universe
-            self.particles.extend([p_par, n_par])
+        direction_rot = random.uniform(0, 2 * math.pi)
 
-        # connect with all universe particles
-        # par.connected_particles.extend(self.particles)
-        # inv_par.connected_particles.extend(self.particles)
-        # for p in self.particles:
-        #     p.connected_particles.extend([p_par, n_par])
+        max_side_velocity = self.particle_spawn_velocity / 2
+        side_velocity = vector.new_vector(
+            random.uniform(-max_side_velocity, max_side_velocity),
+            direction_rot + math.pi / 2
+        )
 
-        print("particle pair spawned at " + str(center))
+        reg_par = particle(
+            # charge
+            True,
+            # position
+            vector.add(
+                spawn_center,
+                vector.new_vector(particle.radius + 1, direction_rot)
+            ),
+            # velocity
+            vector.add(
+                vector.new_vector(self.particle_spawn_velocity, direction_rot),
+                side_velocity
+            )
+        )
+        neg_par = particle(
+            # charge
+            False,
+            # position
+            vector.add(
+                spawn_center,
+                vector.new_vector(particle.radius, direction_rot + math.pi)
+            ),
+            # velocity
+            vector.add(
+                vector.new_vector(self.particle_spawn_velocity, direction_rot + math.pi),
+                side_velocity
+            )
+        )
+
+        reg_par.connected_particle = neg_par
+        neg_par.connected_particle = reg_par
+
+        return (reg_par, neg_par)
 
     def draw(self, surface):
         self.black_hole.draw(surface)
         # draw all particles
-        for p in self.particles:
+        for p in self._particles:
             p.draw(surface)

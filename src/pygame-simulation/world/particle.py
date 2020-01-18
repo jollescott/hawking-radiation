@@ -6,7 +6,6 @@ from trail import trail
 
 class particle:
     radius = 5
-    spawn_velocity = 100
     force_constant = 7000
     mass = 3 * 10**-13
 
@@ -20,7 +19,7 @@ class particle:
         self.trail = trail()
 
         # particle that this particle will react with
-        self.connected_particle
+        self.connected_particle = None
 
     def update(self, elapsed_time, force):
         self.life_time += elapsed_time

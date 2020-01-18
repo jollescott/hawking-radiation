@@ -18,10 +18,10 @@ class black_hole:
         return formulas.schwarzschild_radius(self.mass)
 
     def eat_particle(self, particle):
-        # disconnect with all connected particles
-        for p in particle.connected_particles:
-            p.connected_particles.remove(particle)
-        particle.connected_particles = []
+        # disconnect with connected particle
+        if particle.connected_particle:
+            particle.connected_particle.connected_particle = None
+            particle.connected_particle = None
 
         # # set particle velcity towards black hole center
         # particle.velocity = vector.change_length(
@@ -52,8 +52,16 @@ class black_hole:
             )
         )
 
-    def update(self, elapsed_time):
-        # TODO: eat particles
+    def update(self, elapsed_time, particles):
+        # Eat particles
+        index = 0
+        while index < len(particles):
+            p = particles[index]
+            if not p.is_positive and vector.get_distance(
+                    self.position, p.position) < self.get_radius():
+                self.eat_particle(p)
+                particles.pop(index)
+            index += 1
 
         # Updates all particles and removes them if they have reached
         # the center of the black hole.
