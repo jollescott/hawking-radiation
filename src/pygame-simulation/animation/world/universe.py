@@ -1,9 +1,9 @@
 import time
-import vector
+from animation import vector
 import random
 import math
-from world.particle import particle
-from world.black_hole import black_hole
+from animation.world.particle import particle
+from animation.world.black_hole import black_hole
 import formulas
 import numpy as np
 

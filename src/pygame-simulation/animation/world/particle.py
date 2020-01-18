@@ -1,7 +1,7 @@
 import numpy as np
-import vector
+from animation import vector
 from pygame import draw
-from trail import trail
+from animation.trail import trail
 
 
 class particle:

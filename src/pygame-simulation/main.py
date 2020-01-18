@@ -1,11 +1,11 @@
 import pygame
 import time
-from world.universe import universe
+from animation.animation import animation
 
 (width, height) = (800, 600)
 screen = pygame.display.set_mode((width, height))
 
-universe = universe((width, height))
+animation = animation((width, height))
 
 start_time = time.perf_counter()
 time_multiplier = 1
@@ -22,10 +22,10 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    universe.update(elapsed_time * time_multiplier)
+    animation.update(elapsed_time * time_multiplier)
 
     # draw --------------------------------------
     screen.fill((0, 0, 0))
-    universe.draw(screen)
+    animation.draw(screen)
 
     pygame.display.update()

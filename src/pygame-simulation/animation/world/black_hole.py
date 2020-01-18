@@ -1,5 +1,5 @@
 import numpy as np
-import vector
+from animation import vector
 from pygame import draw
 import formulas
 
