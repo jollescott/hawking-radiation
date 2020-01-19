@@ -4,7 +4,6 @@ import random
 import math
 from animation.world.particle import particle
 from animation.world.black_hole import black_hole
-import formulas
 import numpy as np
 
 
@@ -14,16 +13,14 @@ class universe:
     spawn_on_horizon_chance = 0.15
     particle_spawn_velocity = 100
 
-    def __init__(self, size):
+    def __init__(self, size, scale):
         self._size = size
-        self.black_hole = black_hole(np.array(size) * 0.5, formulas.Ms * 0.05)
+        self.black_hole = black_hole(np.array(size) * 0.5, 0, scale)
         print(self.black_hole.get_radius())
         self._particles = []
         self.__particle_spawn_timer = time.perf_counter()
 
     def update(self, elapsed_time):
-        self.black_hole.update(elapsed_time, self._particles)
-
         # loop thorugh all particles
         index = 0
         while index < len(self._particles):
@@ -47,6 +44,9 @@ class universe:
             self.__particle_spawn_timer = random.uniform(self.min_spawn_time,
                                                          self.max_spawn_time)
 
+        if self.black_hole.mass > 0:
+            self.black_hole.update(elapsed_time, self._particles)
+
     def _spawn_particle_pair(self):
         """
         Spawns a pair of particles with opposite charge.
@@ -69,7 +69,8 @@ class universe:
 
         spawn_center = vector.add(self.black_hole.position, spawn_offset)
 
-        rand_rot = random.choice((-1, 1)) * random.uniform(math.pi / 4, math.pi / 2)
+        rand_rot = random.choice((-1, 1)) * random.uniform(math.pi / 4,
+                                                           math.pi / 2)
 
         reg_par = particle(
             # charge
@@ -114,7 +115,10 @@ class universe:
         spawn_center = vector.add(
             self.black_hole.position,
             vector.rand_vector_rot(
-                random.uniform(self.black_hole.get_radius() + min_horizon_dist, max(self._size) / 2)
+                random.uniform(
+                    self.black_hole.get_radius() + min_horizon_dist,
+                    max(self._size) / 2
+                )
             )
         )
 
@@ -150,7 +154,10 @@ class universe:
             ),
             # velocity
             vector.add(
-                vector.new_vector(self.particle_spawn_velocity, direction_rot + math.pi),
+                vector.new_vector(
+                    self.particle_spawn_velocity,
+                    direction_rot + math.pi
+                ),
                 side_velocity
             )
         )

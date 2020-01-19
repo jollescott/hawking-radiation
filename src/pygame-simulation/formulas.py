@@ -4,7 +4,7 @@ from math import pi
 c = 2.99792458 * 10**8
 
 # gravitational constant
-G = 6.674 * 10**-11
+G = 6.67384 * 10**-11
 
 # planck constant
 h = 6.62607015 * 10**-34
@@ -13,7 +13,7 @@ h = 6.62607015 * 10**-34
 h_bar = h / (2 * pi)
 
 # boltzmann constant
-Kb = 1.380649 * 10**-23
+Kb = 1.38064852 * 10**-23
 
 # mas of the sun
 Ms = 2 * 10**30
@@ -52,4 +52,4 @@ def black_hole_mass(t):
     """
     Returns the mass [kg] of a black hole with the remaning lifetime t [s].
     """
-    return t * h_bar * c**4 / (5120 * pi * G**2)
+    return (t * h_bar * c**4 / (5120 * pi * G**2))**(1/3)

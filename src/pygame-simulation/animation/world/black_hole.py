@@ -9,13 +9,14 @@ class black_hole:
     event_horizon_force = 100
     mass_los_per_particle = 10000
 
-    def __init__(self, position, mass):
+    def __init__(self, position, mass, scale):
         self.position = position
         self.mass = mass
+        self.scale = scale
         self.eaten_particles = []
 
     def get_radius(self):
-        return formulas.schwarzschild_radius(self.mass)
+        return formulas.schwarzschild_radius(self.mass) * self.scale
 
     def eat_particle(self, particle):
         # disconnect with connected particle
@@ -48,7 +49,7 @@ class black_hole:
                         self.position,
                         particle.position
                     )
-                )
+                ) * self.scale
             )
         )
 
