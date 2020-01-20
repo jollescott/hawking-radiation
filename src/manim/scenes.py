@@ -1,70 +1,57 @@
 from manimlib.imports import *
-from random import Random
-import math
 
 
-class HawkingRadiation(Scene):
-    def construct(self):
-        steps = [self.blackhole_presentation, self.vparticle_presentation]
-
-        for step in steps:
-            step()
-
-    def blackhole_presentation(self):
-        circle = Circle()
-        circle.set_style(
-            stroke_color=ORANGE, sheen_factor=2, sheen_direction=RIGHT + DOWN
+class VirtualParticles(Scene):
+    def get_sine_wave(self, dx=0):
+        return FunctionGraph(
+            lambda x: np.sin((x+dx)-(PI/2)),
+            x_min=-4, x_max=4, color=RED
         )
-        circle.scale(2)
 
-        self.play(ShowCreation(circle))
+    def get_cosine_wave(self, dx=0):
+        return FunctionGraph(
+            lambda x: np.cos(x+dx),
+            x_min=-4, x_max=4, color=BLUE
+        )
 
-    def vparticle_presentation(self):
-        for i in range(5):
-            r = Random()
+    def construct(self):
+        # Waves
+        sine_function = self.get_sine_wave()
+        cosine_function = self.get_cosine_wave()
 
-            ran_x = 0
-            ran_y = 0
+        d_theta = ValueTracker(0)
 
-            while True:
-                ran_x = r.randint(-6, 6)
-                ran_y = r.randint(-3, 3)
-
-                if math.sqrt(math.pow(ran_y, 2) + math.pow(ran_y, 2)) > 2:
-                    break
-                else:
-                    print("Inside circle {}, {}".format(ran_x, ran_y))
-
-            l_arrow = Arrow([ran_x, ran_y, 0], [ran_x - 1, ran_y, 0])
-            r_arrow = Arrow([ran_x, ran_y, 0], [ran_x + 1, ran_y, 0])
-
-            p_particle = Point([ran_x, ran_y, 0])
-            p_particle.set_color(BLUE)
-
-            a_particle = Point([ran_x, ran_y, 0])
-            a_particle.set_color(RED)
-
-            self.play(
-                GrowArrow(l_arrow),
-                GrowArrow(r_arrow),
-                ApplyMethod(p_particle.shift, [-1, 0, 0]),
-                ApplyMethod(a_particle.shift, [1, 0, 0]),
+        def update_sine_wave(func):
+            func.become(
+                self.get_sine_wave(dx=d_theta.get_value())
             )
-            self.play(FadeOut(l_arrow), FadeOut(r_arrow))
+            return func
 
-            l_arrow = Arrow([ran_x - 1, ran_y, 0], [ran_x, ran_y, 0])
-            r_arrow = Arrow([ran_x + 1, ran_y, 0], [ran_x, ran_y, 0])
-
-            self.play(
-                GrowArrow(l_arrow),
-                GrowArrow(r_arrow),
-                ApplyMethod(p_particle.shift, [1, 0, 0]),
-                ApplyMethod(a_particle.shift, [-1, 0, 0]),
+        def update_cosine_wave(func):
+            func.become(
+                self.get_cosine_wave(dx=d_theta.get_value())
             )
-            self.play(
-                FadeOut(l_arrow),
-                FadeOut(r_arrow),
-                FadeOut(p_particle),
-                FadeOut(a_particle),
-            )
+            return func
 
+        sine_function.add_updater(update_sine_wave)
+        cosine_function.add_updater(update_cosine_wave)
+
+        # Particles
+        anti_particle = Circle(color=RED, fill_color=RED, fill_opacity=1)
+        anti_particle.scale(0.2)
+        anti_particle.move_to(DOWN)
+
+        particle = Circle(color=BLUE, fill_color=BLUE, fill_opacity=1)
+        particle.scale(0.2)
+        particle.move_to(UP)
+
+        self.add(sine_function)
+        self.add(anti_particle)
+        self.add(cosine_function)
+        self.add(particle)
+
+        self.play(d_theta.increment_value, PI, ApplyMethod(anti_particle.shift, [0, 2, 0]), ApplyMethod(
+            particle.shift, [0, -2, 0]), rate_func=linear)
+
+        self.play(d_theta.increment_value, PI, ApplyMethod(anti_particle.shift, [0, -2, 0]), ApplyMethod(
+            particle.shift, [0, 2, 0]), rate_func=linear)
