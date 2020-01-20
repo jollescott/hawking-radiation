@@ -18,7 +18,7 @@ class universe:
         self.black_hole = black_hole(np.array(size) * 0.5, 0, scale)
         print(self.black_hole.get_radius())
         self._particles = []
-        self.__particle_spawn_timer = time.perf_counter()
+        self.__particle_spawn_timer = 0 #time.perf_counter()
 
     def update(self, elapsed_time):
         # loop thorugh all particles
@@ -38,6 +38,7 @@ class universe:
             index += 1
 
         self.__particle_spawn_timer -= elapsed_time
+
         # check if it is time to spawn a particle pair
         if self.__particle_spawn_timer <= 0 and self.black_hole.mass > 0:
             self._spawn_particle_pair()
