@@ -14,9 +14,12 @@ simulation = simulation()
 animation = animation((width, height), simulation.start_mass)
 
 start_time = time.perf_counter()
-time_multiplier = 5 * 10**72
+time_multiplier = 1  # 5 * 10**73
 
 font = pygame.font.SysFont('consolas', 15)
+
+
+clock = pygame.time.Clock()
 
 
 def draw_data(data):
@@ -59,6 +62,7 @@ def draw_data(data):
         ))
 
 
+index = 0
 running = True
 while running:
 
@@ -112,5 +116,10 @@ while running:
             "{:.2e}".format(formulas.black_hole_lifetime(current_mass))
         ),
     ])
+
+    pygame.image.save(screen, "img/{}.jpeg".format(index))
+    index += 1
+
+    clock.tick(24)
 
     pygame.display.update()
