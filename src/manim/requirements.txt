@@ -6,6 +6,6 @@ Pillow==8.1.1
 progressbar==2.5
 pycairo==1.19.1
 pydub==0.24.1
-Pygments==2.6.1
+Pygments==2.7.4
 scipy==1.5.1
 tqdm==4.47.0
