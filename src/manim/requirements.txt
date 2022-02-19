@@ -1,6 +1,6 @@
 colour==0.1.5
 manimlib==0.1.11
-numpy==1.19.0
+numpy==1.21.0
 opencv-python==4.3.0.36
 Pillow==9.0.0
 progressbar==2.5
