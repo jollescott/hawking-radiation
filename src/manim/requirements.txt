@@ -2,7 +2,7 @@ colour==0.1.5
 manimlib==0.1.11
 numpy==1.22.0
 opencv-python==4.3.0.36
-Pillow==9.3.0
+Pillow==10.0.1
 progressbar==2.5
 pycairo==1.19.1
 pydub==0.24.1
